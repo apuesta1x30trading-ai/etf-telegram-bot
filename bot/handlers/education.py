@@ -1,24 +1,27 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 from services.education.groq_client import ask_groq
-from services.education.concepts_db import get_concept
 import json
 import os
 
-# Cargar base de conceptos
+# Cargar base de conceptos desde el JSON
 CONCEPTS_PATH = os.path.join(
     os.path.dirname(__file__), 
     "../../services/education/concepts_db.json"
 )
-with open(CONCEPTS_PATH, "r", encoding="utf-8") as f:
-    CONCEPTS = json.load(f)
+
+try:
+    with open(CONCEPTS_PATH, "r", encoding="utf-8") as f:
+        CONCEPTS = json.load(f)
+except FileNotFoundError:
+    CONCEPTS = {} # Fallback por si el archivo no se encuentra
 
 async def concepto_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Busca un concepto en la base de datos local."""
     if not context.args:
         conceptos_list = "\n".join(f"• /concepto_{k}" for k in CONCEPTS.keys())
         await update.message.reply_text(
-            f" *Conceptos disponibles:*\n\n{conceptos_list}\n\n"
+            f"📚 *Conceptos disponibles:*\n\n{conceptos_list}\n\n"
             "O pregúntame directamente cualquier duda de inversión.",
             parse_mode="Markdown"
         )
@@ -35,7 +38,7 @@ async def concepto_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🎯 *Por qué importa:* {concept['relevancia']}"
         )
     else:
-        texto = f"❓ No tengo '{key}' en mi base de conceptos. Prueba a preguntarme directamente."
+        texto = f"❓ No tengo '{key}' en mi base de conceptos. Prueba a preguntarme directamente o usa /conceptos para ver la lista."
     
     await update.message.reply_text(texto, parse_mode="Markdown")
 
@@ -54,7 +57,7 @@ async def education_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"⚠️ Error al procesar tu pregunta: {str(e)}"
         )
 
-# Handlers para cada concepto
+# Handlers para cada concepto específico
 def get_concept_handlers():
     handlers = []
     for key in CONCEPTS.keys():
