@@ -3,6 +3,11 @@ from telegram.ext import ContextTypes, CommandHandler
 import yfinance as yf
 from config import ETFS
 from services.cache import price_cache
+import html
+
+def escape_html(text: str) -> str:
+    """Escapa caracteres especiales HTML para evitar errores de parseo."""
+    return html.escape(str(text))
 
 async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🔄 Obteniendo precios actuales de mercado...")
@@ -39,14 +44,22 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 })
                 fuente = ""
             
-            emoji = "" if cambio > 0 else "📉" if cambio < 0 else "➖"
+            emoji = "📈" if cambio > 0 else "📉" if cambio < 0 else "➖"
+            
+            # ESCAPAR todos los datos dinámicos para evitar errores HTML
+            nombre_escaped = escape_html(nombre)
+            precio_escaped = escape_html(str(precio))
+            moneda_escaped = escape_html(str(moneda))
+            cambio_escaped = escape_html(f"{cambio:.2f}")
+            fuente_escaped = escape_html(fuente)
             
             mensaje += (
-                f"<b>{ticker_key}</b> ({nombre}){fuente}\n"
-                f"💰 Precio: <code>{precio} {moneda}</code>\n"
-                f"{emoji} Variación hoy: <code>{cambio:.2f}%</code>\n\n"
+                f"<b>{ticker_key}</b> ({nombre_escaped}){fuente_escaped}\n"
+                f"💰 Precio: <code>{precio_escaped} {moneda_escaped}</code>\n"
+                f"{emoji} Variación hoy: <code>{cambio_escaped}%</code>\n\n"
             )
         except Exception as e:
-            mensaje += f"❌ Error al obtener datos de {ticker_key}: {str(e)}\n\n"
+            error_escaped = escape_html(str(e))
+            mensaje += f"❌ Error al obtener datos de {ticker_key}: {error_escaped}\n\n"
             
     await update.message.reply_text(mensaje, parse_mode="HTML")
