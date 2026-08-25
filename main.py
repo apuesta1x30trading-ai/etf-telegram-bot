@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI, Request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from bot.handlers.demo import demo_cmd
 
 from config import TELEGRAM_TOKEN
 from bot.handlers.start import start, help_cmd
@@ -17,6 +18,7 @@ application.add_handler(CommandHandler("start", start))
 application.add_handler(CommandHandler("help", help_cmd))
 application.add_handler(CommandHandler("concepto", concepto_cmd))
 application.add_handler(CommandHandler("conceptos", concepto_cmd))
+application.add_handler(CommandHandler("demo", demo_cmd))
 
 # 3. Registrar handlers dinámicos para cada concepto del JSON
 for handler in get_concept_handlers():
