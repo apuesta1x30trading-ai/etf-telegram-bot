@@ -1,13 +1,12 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# Render inyecta estas variables directamente. 
+# Si faltan, asignamos un valor por defecto para que no crashee al importar.
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "TU_TOKEN_AQUI")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 RENDER_URL = os.getenv("RENDER_URL", "http://localhost:8000")
 
-# ETFs a monitorizar
+# Configuración de los ETFs a monitorizar
 ETFS = {
     "H4Z3": {
         "ticker_yf": "H4Z3.DE",
