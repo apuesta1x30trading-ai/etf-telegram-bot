@@ -1,9 +1,12 @@
+import os
 from fastapi import FastAPI, Request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
+
+# Importar configuraciones y handlers
+from config import TELEGRAM_TOKEN
 from bot.handlers.start import start, help_cmd
 from bot.handlers.education import concepto_cmd, education_chat, get_concept_handlers
-from config import TELEGRAM_TOKEN
 
 app = FastAPI()
 
@@ -27,7 +30,8 @@ application.add_handler(
 
 @app.post("/webhook")
 async def webhook(request: Request):
-    update = Update.de_await(await request.json(), application.bot)
+    # de_json es el método correcto para parsear la actualización en v20+
+    update = Update.de_json(await request.json(), application.bot)
     await application.process_update(update)
     return {"status": "ok"}
 
@@ -37,11 +41,12 @@ async def health():
 
 @app.on_event("startup")
 async def startup():
-    webhook_url = f"{os.getenv('RENDER_URL')}/webhook"
+    render_url = os.getenv("RENDER_URL", "http://localhost:8000")
+    webhook_url = f"{render_url}/webhook"
+    print(f"🔗 Setting webhook to: {webhook_url}")
     await application.bot.set_webhook(webhook_url)
-    print(f"Webhook set to {webhook_url}")
 
 if __name__ == "__main__":
     import uvicorn
-    import os
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
