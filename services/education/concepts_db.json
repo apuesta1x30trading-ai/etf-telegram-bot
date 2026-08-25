@@ -1,0 +1,38 @@
+{
+  "ter": {
+    "titulo": "TER (Total Expense Ratio)",
+    "definicion": "El TER o Ratio de Gastos Totales es el coste anual que cobra el gestor del ETF por administrar el fondo. Se expresa como porcentaje sobre el patrimonio.",
+    "ejemplo": "Un TER del 0.15% significa que por cada 1.000€ invertidos, pagas 1.50€ al año en comisiones.",
+    "relevancia": "Cuanto menor sea el TER, más rentabilidad neta obtienes. Es uno de los factores más importantes al elegir un ETF."
+  },
+  "nav": {
+    "titulo": "NAV (Net Asset Value)",
+    "definicion": "El Valor Liquidativo o NAV es el valor real de cada participación del ETF, calculado dividiendo el valor total de los activos del fondo entre el número de participaciones.",
+    "ejemplo": "Si un ETF tiene activos por valor de 1.000.000€ y 10.000 participaciones, el NAV es 100€ por participación.",
+    "relevancia": "El precio de mercado del ETF suele rondar el NAV, pero puede haber pequeñas diferencias (prima o descuento)."
+  },
+  "etf": {
+    "titulo": "ETF (Exchange Traded Fund)",
+    "definicion": "Un ETF es un fondo de inversión que cotiza en bolsa como si fuera una acción. Replica el comportamiento de un índice (MSCI World, S&P 500, etc.).",
+    "ejemplo": "Al comprar una participación de EUNL, estás invirtiendo en más de 1.500 empresas de 23 países desarrollados.",
+    "relevancia": "Los ETFs combinan la diversificación de los fondos con la flexibilidad de las acciones."
+  },
+  "acumulacion": {
+    "titulo": "ETF de Acumulación (Acc)",
+    "definicion": "Un ETF de acumulación reinvierte automáticamente los dividendos que reciben las empresas del índice, en lugar de repartirlos al inversor.",
+    "ejemplo": "Si una empresa del MSCI World paga 10€ de dividendo, el ETF lo usa para comprar más acciones internamente.",
+    "relevancia": "Ventaja fiscal en muchos países (no pagas impuestos hasta que vendes) y efecto del interés compuesto."
+  },
+  "replica_fisica": {
+    "titulo": "Réplica Física",
+    "definicion": "El ETF compra realmente todas (o una muestra representativa) de las acciones del índice que replica.",
+    "ejemplo": "H4Z3 compra físicamente acciones de empresas de mercados emergentes.",
+    "relevancia": "Menor riesgo de contraparte que la réplica sintética."
+  },
+  "renta_variable": {
+    "titulo": "Renta Variable",
+    "definicion": "Activos financieros cuyo rendimiento no está garantizado y puede variar. Principalmente acciones.",
+    "ejemplo": "Los ETFs de acciones como H4Z3 y EUNL son renta variable.",
+    "relevancia": "Mayor potencial de rentabilidad a largo plazo, pero con más volatilidad que la renta fija."
+  }
+}
