@@ -36,6 +36,7 @@ async def webhook(request: Request):
     return {"status": "ok"}
 
 @app.get("/")
+@app.head("/")  # <-- Añade esta línea para que Render no cierre el servicio
 async def health():
     return {"status": "ok", "message": "ETF Bot is running"}
 
