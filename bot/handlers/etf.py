@@ -4,25 +4,26 @@ from config import ETFS
 from services.twelve_data_client import get_etf_price
 
 async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(" Obteniendo precios actuales de mercado...")
+    await update.message.reply_text("🔄 Obteniendo precios actuales de mercado...")
     
     mensaje = "📊 Precios Actuales de tus ETFs\n\n"
     
     for ticker_key, etf_info in ETFS.items():
-        ticker = etf_info["ticker_yf"].replace(".DE", "")  # Quitar .DE para Twelve Data
+        # Limpiar el ticker (quitar .DE si existe) para Twelve Data
+        raw_ticker = etf_info.get("ticker_yf", ticker_key)
+        ticker = raw_ticker.replace(".DE", "").replace(".F", "")
         nombre = etf_info["nombre"]
         
-        # Usar Twelve Data
-        data = get_etf_price(ticker, exchange="XETRA")
+        data = get_etf_price(ticker)
         
         if "error" in data:
-            mensaje += f" Error con {ticker_key}: {data['error']}\n\n"
+            mensaje += f"❌ Error con {ticker_key}: {data['error']}\n\n"
         else:
             precio = data["precio"]
             cambio = data["cambio"]
             moneda = data["moneda"]
             
-            emoji = "" if cambio > 0 else "📉" if cambio < 0 else ""
+            emoji = "📈" if cambio > 0 else "📉" if cambio < 0 else "➖"
             
             mensaje += (
                 f"{ticker_key} - {nombre}\n"
@@ -30,4 +31,5 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{emoji} Variación hoy: {cambio:.2f}%\n\n"
             )
     
+    # Enviamos sin parse_mode para evitar cualquier error de formato
     await update.message.reply_text(mensaje)
