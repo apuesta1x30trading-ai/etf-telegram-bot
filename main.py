@@ -1,10 +1,10 @@
 import os
 from fastapi import FastAPI, Request
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, JobQueue
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, JobQueue, CallbackQueryHandler
 
 from config import TELEGRAM_TOKEN
-from bot.handlers.start import start, help_cmd
+from bot.handlers.start import start, help_cmd, menu_callback
 from bot.handlers.education import concepto_cmd, education_chat, get_concept_handlers
 from bot.handlers.etf import precio_cmd
 from bot.handlers.alerts import set_alert, check_alerts
@@ -26,9 +26,12 @@ application.add_handler(CommandHandler("precio", precio_cmd))
 application.add_handler(CommandHandler("alerta", set_alert))
 application.add_handler(CommandHandler("historico", historico_cmd))
 application.add_handler(CommandHandler("portfolio", portfolio_cmd))
-application.add_handler(CommandHandler("add", add_asset))       
+application.add_handler(CommandHandler("add", add_asset))
 application.add_handler(CommandHandler("clear", clear_portfolio))
 application.add_handler(CommandHandler("noticias", noticias_cmd))
+
+# Handler para los botones del menú inline
+application.add_handler(CallbackQueryHandler(menu_callback))
 
 for handler in get_concept_handlers():
     application.add_handler(handler)
