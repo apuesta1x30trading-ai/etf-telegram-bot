@@ -7,3 +7,4 @@
    matplotlib>=3.8.0
    python-dotenv>=1.0.0
    httpx>=0.27.0
+   twelvedata==1.6.0
