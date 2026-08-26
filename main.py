@@ -1,49 +1,48 @@
 import os
 from fastapi import FastAPI, Request
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from bot.handlers.demo import demo_cmd
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, JobQueue
 
 from config import TELEGRAM_TOKEN
 from bot.handlers.start import start, help_cmd
 from bot.handlers.education import concepto_cmd, education_chat, get_concept_handlers
+from bot.handlers.etf import precio_cmd
+from bot.handlers.alerts import set_alert, check_alerts
+from bot.handlers.history import historico_cmd
+from bot.handlers.portfolio import portfolio_cmd, add_asset, clear_portfolio
+from bot.handlers.news import noticias_cmd
 
 app = FastAPI()
 
-# 1. Construir la aplicación del bot
-application = Application.builder().token(TELEGRAM_TOKEN).build()
+# 1. Construir la aplicación con JobQueue habilitado
+application = Application.builder().token(TELEGRAM_TOKEN).job_queue(JobQueue()).build()
 
-# 2. Registrar handlers básicos
+# 2. Registrar handlers
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CommandHandler("help", help_cmd))
 application.add_handler(CommandHandler("concepto", concepto_cmd))
 application.add_handler(CommandHandler("conceptos", concepto_cmd))
-application.add_handler(CommandHandler("demo", demo_cmd))
+application.add_handler(CommandHandler("precio", precio_cmd))
+application.add_handler(CommandHandler("alerta", set_alert))
+application.add_handler(CommandHandler("historico", historico_cmd))
+application.add_handler(CommandHandler("portfolio", portfolio_cmd))
+application.add_handler(CommandHandler("añadir", add_asset))
+application.add_handler(CommandHandler("vaciar_cartera", clear_portfolio))
+application.add_handler(CommandHandler("noticias", noticias_cmd))
 
-# 3. Registrar handlers dinámicos para cada concepto del JSON
 for handler in get_concept_handlers():
     application.add_handler(handler)
 
-# 4. Handler para chat libre (asistente educativo)
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, education_chat))
-
-# 5. Handler para precios de ETFs (si el archivo existe)
-try:
-    from bot.handlers.etf import precio_cmd
-    application.add_handler(CommandHandler("precio", precio_cmd))
-except ImportError:
-    pass # Si aún no has creado el archivo etf.py, no fallará
 
 @app.post("/webhook")
 async def webhook(request: Request):
-    # Parsear la actualización de Telegram
     update = Update.de_json(await request.json(), application.bot)
-    # Procesar la actualización
     await application.process_update(update)
     return {"status": "ok"}
 
 @app.get("/")
-@app.head("/")  # Permite los chequeos de salud de Render sin errores 405
+@app.head("/")
 async def health():
     return {"status": "ok", "message": "ETF Bot is running"}
 
@@ -53,10 +52,12 @@ async def startup():
     webhook_url = f"{render_url}/webhook"
     print(f"🔗 Configurando webhook en: {webhook_url}")
     
-    # ¡CRUCIAL! Inicializar la aplicación antes de procesar updates
     await application.initialize()
     await application.bot.set_webhook(webhook_url)
-    print("✅ Bot inicializado y webhook configurado correctamente.")
+    
+    # Programar el chequeo de alertas cada 15 minutos (900 segundos)
+    application.job_queue.run_repeating(check_alerts, interval=900, first=60)
+    print("✅ Bot inicializado, webhook configurado y alertas programadas.")
 
 if __name__ == "__main__":
     import uvicorn
