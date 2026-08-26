@@ -26,15 +26,30 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 data = yf.Ticker(ticker)
                 info = data.info
                 
-                # Verificación de seguridad por si Yahoo devuelve datos vacíos
-                if not info or ('currentPrice' not in info and 'regularMarketPrice' not in info):
-                    raise Exception("Datos no disponibles temporalmente")
+                # Intentar obtener el precio de diferentes formas
+                precio = None
+                for key in ['currentPrice', 'regularMarketPrice', 'previousClose', 'bid', 'ask']:
+                    if key in info and info[key] is not None:
+                        precio = info[key]
+                        break
                 
-                precio = info.get('currentPrice', info.get('regularMarketPrice', 'N/A'))
+                if precio is None:
+                    # Último intento: usar fast_info
+                    try:
+                        fast_info = data.fast_info
+                        precio = float(fast_info.last_price)
+                    except:
+                        raise Exception("No se pudo obtener el precio")
+                
+                # Obtener cambio porcentual
                 cambio = info.get('regularMarketChangePercent', 0)
+                if cambio is None:
+                    cambio = 0
+                
+                # Obtener moneda
                 moneda = info.get('currency', 'EUR')
                 
-                # Guardar en caché por 1 hora
+                # Guardar en caché
                 price_cache.set(ticker, {
                     "precio": precio,
                     "cambio": cambio,
@@ -42,7 +57,7 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 })
                 fuente = ""
             
-            emoji = "📈" if cambio > 0 else "📉" if cambio < 0 else "➖"
+            emoji = "" if cambio > 0 else "📉" if cambio < 0 else "➖"
             
             mensaje += (
                 f"{ticker_key} - {nombre}{fuente}\n"
@@ -50,6 +65,7 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{emoji} Variación hoy: {cambio:.2f}%\n\n"
             )
         except Exception as e:
-            mensaje += f"⚠️ {ticker_key}: Datos no disponibles en este momento. Intenta más tarde.\n\n"
+            # Mensaje más informativo
+            mensaje += f"️ {ticker_key}: Temporalmente sin datos. Intenta en unos minutos.\n\n"
             
     await update.message.reply_text(mensaje)
