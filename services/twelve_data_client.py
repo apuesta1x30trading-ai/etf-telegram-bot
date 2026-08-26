@@ -8,13 +8,6 @@ API_KEY = os.getenv("TWELVE_DATA_API_KEY", "")
 def get_etf_price(ticker: str, exchange: str = "XETRA"):
     """
     Obtiene el precio de un ETF usando Twelve Data.
-    
-    Args:
-        ticker: Símbolo del ETF (ej: H4Z3, EUNL)
-        exchange: Bolsa (por defecto XETRA para ETFs europeos)
-    
-    Returns:
-        dict con precio, cambio y moneda, o None si hay error
     """
     if not API_KEY:
         return {"error": "API key de Twelve Data no configurada"}
@@ -26,8 +19,8 @@ def get_etf_price(ticker: str, exchange: str = "XETRA"):
         if cached:
             return cached
         
-        # Consultar Twelve Data
-        td = TDClient(api_key=API_KEY)
+        # Consultar Twelve Data - NOTA: usar 'apikey' no 'api_key'
+        td = TDClient(apikey=API_KEY)
         
         # Obtener precio en tiempo real
         quote = td.quote(symbol=f"{ticker}:{exchange}")
