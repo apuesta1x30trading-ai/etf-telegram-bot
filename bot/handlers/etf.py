@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from config import ETFS
-from services.finnhub_client import get_etf_price
+from services.eodhd_client import get_etf_price
 
 async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🔄 Obteniendo precios actuales de mercado...")
@@ -9,21 +9,12 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mensaje = "📊 Precios Actuales de tus ETFs\n\n"
     
     for ticker_key, etf_info in ETFS.items():
-        # Limpiar ticker (quitar .DE o .L)
         raw_ticker = etf_info.get("ticker_yf", ticker_key)
         ticker = raw_ticker.replace(".DE", "").replace(".L", "")
         nombre = etf_info["nombre"]
         
-        # Intentar primero en XETRA (Alemania)
-        data = get_etf_price(ticker, exchange="DE")
-        
-        # Si no encuentra en XETRA, intentar en Londres
-        if "error" in data:
-            data = get_etf_price(ticker, exchange="L")
-        
-        # Si sigue sin funcionar, intentar sin exchange
-        if "error" in data:
-            data = get_etf_price(ticker)
+        # EODHD: probar XETRA primero
+        data = get_etf_price(ticker, exchange="XETRA")
         
         if "error" in data:
             mensaje += f"❌ {ticker_key}: {data['error']}\n\n"
@@ -32,7 +23,7 @@ async def precio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             cambio = data["cambio"]
             moneda = data["moneda"]
             
-            emoji = "📈" if cambio > 0 else "📉" if cambio < 0 else "➖"
+            emoji = "" if cambio > 0 else "📉" if cambio < 0 else "➖"
             
             mensaje += (
                 f"{ticker_key} - {nombre}\n"
