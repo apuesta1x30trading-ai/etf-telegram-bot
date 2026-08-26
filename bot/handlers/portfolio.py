@@ -13,8 +13,8 @@ async def portfolio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not portfolio:
         await update.message.reply_text(
             "📂 *Tu cartera está vacía.*\n\n"
-            "Usa /añadir <ETF> <cantidad> para empezar.\n"
-            "Ejemplo: /añadir EUNL 10",
+            "Usa /add <ETF> <cantidad> para empezar.\n"
+            "Ejemplo: /add EUNL 10",
             parse_mode="Markdown"
         )
         return
@@ -38,7 +38,7 @@ async def portfolio_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def add_asset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 2:
-        await update.message.reply_text("⚠️ Uso: /añadir <ETF> <cantidad>\nEjemplo: /añadir H4Z3 50")
+        await update.message.reply_text("⚠️ Uso: /add <ETF> <cantidad>\nEjemplo: /add H4Z3 50")
         return
     
     ticker_key = context.args[0].upper()
