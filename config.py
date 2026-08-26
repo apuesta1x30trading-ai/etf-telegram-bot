@@ -9,13 +9,13 @@ RENDER_URL = os.getenv("RENDER_URL", "http://localhost:8000")
 # Configuración de los ETFs a monitorizar
 ETFS = {
     "H4Z3": {
-        "ticker_yf": "H4Z3.DE",  # o probar: "H4Z3.L" (Londres)
+        "ticker_yf": "H4Z3.L",  # o probar: "H4Z3.L" (Londres)
         "nombre": "HSBC MSCI Emerging Markets UCITS ETF",
         "isin": "IE000KCS7J59",
         "ter": "0.15%",
     },
     "EUNL": {
-        "ticker_yf": "EUNL.DE",  # o probar: "EUNL.L" (Londres)
+        "ticker_yf": "EUNL.L",  # o probar: "EUNL.L" (Londres)
         "nombre": "iShares Core MSCI World UCITS ETF",
         "isin": "IE00B4L5Y983",
         "ter": "0.20%",
