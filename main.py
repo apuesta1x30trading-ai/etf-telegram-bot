@@ -11,7 +11,7 @@ from bot.handlers.alerts import set_alert, check_alerts
 from bot.handlers.history import historico_cmd
 from bot.handlers.portfolio import portfolio_cmd, add_asset, clear_portfolio
 from bot.handlers.news import noticias_cmd
-from bot.handlers.signals import toggle_signals, check_market_signals
+from bot.handlers.signals import toggle_signals, check_market_signals  # <-- NUEVA IMPORTACIÓN
 
 app = FastAPI()
 
@@ -30,7 +30,7 @@ application.add_handler(CommandHandler("portfolio", portfolio_cmd))
 application.add_handler(CommandHandler("add", add_asset))
 application.add_handler(CommandHandler("clear", clear_portfolio))
 application.add_handler(CommandHandler("noticias", noticias_cmd))
-application.job_queue.run_repeating(check_market_signals, interval=14400, first=300)
+application.add_handler(CommandHandler("senales", toggle_signals))  # <-- NUEVO COMANDO
 
 # Handler para los botones del menú inline
 application.add_handler(CallbackQueryHandler(menu_callback))
@@ -59,13 +59,14 @@ async def startup():
     
     await application.initialize()
     await application.bot.set_webhook(webhook_url)
-    # Alertas de precio cada 15 min
+    
+    # Programar el chequeo de alertas de precio cada 15 minutos (900 segundos)
     application.job_queue.run_repeating(check_alerts, interval=900, first=60)
     
-    # Señales de mercado (RSI / Movimientos) cada 4 horas
+    # Programar chequeo de señales de mercado cada 4 horas (14400 segundos)
     application.job_queue.run_repeating(check_market_signals, interval=14400, first=300)
     
-    print("✅ Bot inicializado, webhook configurado y alertas programadas.")
+    print("✅ Bot inicializado, webhook, alertas y señales automáticas programadas.")
 
 if __name__ == "__main__":
     import uvicorn
