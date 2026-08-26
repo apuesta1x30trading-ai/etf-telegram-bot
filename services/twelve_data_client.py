@@ -4,38 +4,39 @@ from services.cache import price_cache
 
 API_KEY = os.getenv("TWELVE_DATA_API_KEY", "")
 
-def get_etf_price(ticker: str, exchange: str = "XETRA"):
+def get_etf_price(ticker: str, exchange: str = "EURONEXT"):
     """
     Obtiene el precio de un ETF usando Twelve Data.
+    Exchange: EURONEXT (para ETFs europeos como H4Z3 y EUNL)
     """
     if not API_KEY:
         return {"error": "API key de Twelve Data no configurada"}
     
     try:
-        # Intentar caché primero
         cache_key = f"{ticker}_{exchange}"
         cached = price_cache.get(cache_key)
         if cached:
             return cached
         
-        # Consultar Twelve Data
         td = TDClient(apikey=API_KEY)
         
-        # Obtener precio - devuelve un objeto QuoteEndpoint, no un dict
+        # Probar primero con EURONEXT
         quote = td.quote(symbol=f"{ticker}:{exchange}")
         
-        # Acceder a los atributos del objeto directamente
-        if hasattr(quote, 'status') and quote.status == 'error':
-            return {"error": getattr(quote, 'message', 'Error desconocido')}
+        # Verificar si hay datos válidos
+        precio = getattr(quote, 'close', 0)
+        
+        # Si el precio es 0, intentar sin exchange (búsqueda global)
+        if precio == 0 or precio is None:
+            quote = td.quote(symbol=ticker)
         
         data = {
-            "precio": float(getattr(quote, 'close', 0)),
-            "cambio": float(getattr(quote, 'percent_change', 0)),
+            "precio": float(getattr(quote, 'close', 0) or 0),
+            "cambio": float(getattr(quote, 'percent_change', 0) or 0),
             "moneda": getattr(quote, 'currency', 'EUR'),
             "nombre": getattr(quote, 'symbol', ticker)
         }
         
-        # Guardar en caché
         price_cache.set(cache_key, data)
         
         return data
