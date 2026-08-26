@@ -2,7 +2,6 @@ import os
 from twelvedata import TDClient
 from services.cache import price_cache
 
-# Inicializar cliente
 API_KEY = os.getenv("TWELVE_DATA_API_KEY", "")
 
 def get_etf_price(ticker: str, exchange: str = "XETRA"):
@@ -19,20 +18,21 @@ def get_etf_price(ticker: str, exchange: str = "XETRA"):
         if cached:
             return cached
         
-        # Consultar Twelve Data - NOTA: usar 'apikey' no 'api_key'
+        # Consultar Twelve Data
         td = TDClient(apikey=API_KEY)
         
-        # Obtener precio en tiempo real
+        # Obtener precio - devuelve un objeto QuoteEndpoint, no un dict
         quote = td.quote(symbol=f"{ticker}:{exchange}")
         
-        if quote.get("status") == "error":
-            return {"error": quote.get("message", "Error desconocido")}
+        # Acceder a los atributos del objeto directamente
+        if hasattr(quote, 'status') and quote.status == 'error':
+            return {"error": getattr(quote, 'message', 'Error desconocido')}
         
         data = {
-            "precio": float(quote.get("close", 0)),
-            "cambio": float(quote.get("percent_change", 0)),
-            "moneda": quote.get("currency", "EUR"),
-            "nombre": quote.get("symbol", ticker)
+            "precio": float(getattr(quote, 'close', 0)),
+            "cambio": float(getattr(quote, 'percent_change', 0)),
+            "moneda": getattr(quote, 'currency', 'EUR'),
+            "nombre": getattr(quote, 'symbol', ticker)
         }
         
         # Guardar en caché
