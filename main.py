@@ -26,8 +26,8 @@ application.add_handler(CommandHandler("precio", precio_cmd))
 application.add_handler(CommandHandler("alerta", set_alert))
 application.add_handler(CommandHandler("historico", historico_cmd))
 application.add_handler(CommandHandler("portfolio", portfolio_cmd))
-application.add_handler(CommandHandler("añadir", add_asset))
-application.add_handler(CommandHandler("vaciar_cartera", clear_portfolio))
+application.add_handler(CommandHandler("add", add_asset))       
+application.add_handler(CommandHandler("clear", clear_portfolio))
 application.add_handler(CommandHandler("noticias", noticias_cmd))
 
 for handler in get_concept_handlers():
